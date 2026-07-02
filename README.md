@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Coding AI Assistant
 
-## Getting Started
+Phind, Cursor Web 같은 개발자 도구를 참고해 만든 코딩 특화 AI 어시스턴트 웹앱입니다. Google Gemini API와 스트리밍으로 통신하며, 마크다운/코드 하이라이팅 렌더링과 로컬 저장 기반 대화 히스토리를 제공합니다.
 
-First, run the development server:
+## 기술 스택
+
+- [Next.js](https://nextjs.org) (App Router) + React + TypeScript
+- Tailwind CSS
+- [Google Gemini API](https://ai.google.dev/) (`gemini-2.5-flash`, 무료 티어)
+- `react-markdown` + `remark-gfm` (마크다운 렌더링)
+- `react-syntax-highlighter` (코드 블록 syntax highlighting)
+
+## 주요 기능
+
+- Gemini API와 스트리밍으로 통신하는 채팅 인터페이스
+- 마크다운 렌더링 및 코드 블록 syntax highlighting
+- 코드 블록 복사 버튼
+- 대화 히스토리 로컬 저장 (localStorage) 및 사이드바로 관리 (새 대화 / 전환 / 삭제)
+- 다크모드 기반 IDE 스타일 반응형 UI (모바일에서는 사이드바가 드로어로 전환)
+
+## 시작하기
+
+```bash
+npm install
+cp .env.example .env.local
+```
+
+`.env.local`을 열어 [Google AI Studio](https://aistudio.google.com/apikey)에서 발급받은 API 키를 입력합니다.
+
+```
+GEMINI_API_KEY=your_api_key_here
+```
+
+개발 서버를 실행합니다.
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+[http://localhost:3000](http://localhost:3000) 에서 확인할 수 있습니다.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 프로젝트 구조
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+app/
+  page.tsx           대화 상태 관리, 사이드바/채팅 영역 조합
+  api/chat/route.ts   Gemini로 스트리밍 프록시하는 API 라우트
+lib/
+  ai/                 AI 제공자 추상화 (AIProvider 인터페이스 + Gemini 구현체)
+  storage.ts          localStorage 기반 대화 히스토리 CRUD
+components/           ChatWindow, MessageBubble, CodeBlock, ChatInput, Sidebar
+hooks/useChat.ts       스트리밍 요청/응답 상태 관리
+```
 
-## Learn More
+## 다른 AI 제공자로 교체하기
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+AI 호출은 `lib/ai`에 격리되어 있습니다. `AIProvider` 인터페이스(`lib/ai/types.ts`)를 구현하는 새 클래스(예: `lib/ai/claude.ts`)를 추가하고, `lib/ai/index.ts`에서 인스턴스화하는 부분만 교체하면 나머지 코드(API 라우트, UI)는 수정할 필요가 없습니다.
