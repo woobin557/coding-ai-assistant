@@ -1,7 +1,7 @@
 "use client";
 
 import { Send } from "lucide-react";
-import { useState, type KeyboardEvent } from "react";
+import { useRef, useState, type KeyboardEvent } from "react";
 
 interface ChatInputProps {
   onSend: (content: string) => void;
@@ -10,11 +10,20 @@ interface ChatInputProps {
 
 export function ChatInput({ onSend, disabled }: ChatInputProps) {
   const [value, setValue] = useState("");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const resize = (element: HTMLTextAreaElement) => {
+    element.style.height = "auto";
+    element.style.height = `${Math.min(element.scrollHeight, 160)}px`;
+  };
 
   const submit = () => {
     if (!value.trim() || disabled) return;
     onSend(value);
     setValue("");
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+    }
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -28,8 +37,12 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
     <div className="border-t border-zinc-800 bg-zinc-950 px-4 py-4">
       <div className="mx-auto flex max-w-3xl items-end gap-2 rounded-xl border border-zinc-800 bg-zinc-900 p-2">
         <textarea
+          ref={textareaRef}
           value={value}
-          onChange={(event) => setValue(event.target.value)}
+          onChange={(event) => {
+            setValue(event.target.value);
+            resize(event.target);
+          }}
           onKeyDown={handleKeyDown}
           rows={1}
           placeholder="코드에 대해 질문해보세요... (Shift+Enter로 줄바꿈)"

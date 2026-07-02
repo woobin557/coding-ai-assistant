@@ -1,5 +1,6 @@
 "use client";
 
+import { Menu } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { ChatInput } from "@/components/ChatInput";
 import { ChatWindow } from "@/components/ChatWindow";
@@ -15,6 +16,7 @@ import {
 export default function Home() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Mirrors activeId but updates synchronously (not via React's render/effect
   // cycle) so that mid-stream calls to handleMessagesChange - which fire many
@@ -111,12 +113,22 @@ export default function Home() {
       <Sidebar
         conversations={conversations}
         activeId={activeId}
+        isOpen={isSidebarOpen}
         onSelect={handleSelect}
         onNew={handleNew}
         onDelete={handleDelete}
+        onClose={() => setIsSidebarOpen(false)}
       />
       <div className="flex flex-1 flex-col overflow-hidden">
-        <header className="border-b border-zinc-800 px-4 py-3">
+        <header className="flex items-center gap-2 border-b border-zinc-800 px-4 py-3">
+          <button
+            type="button"
+            onClick={() => setIsSidebarOpen(true)}
+            aria-label="사이드바 열기"
+            className="shrink-0 rounded-lg p-1.5 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 md:hidden"
+          >
+            <Menu size={18} />
+          </button>
           <h1 className="text-sm font-semibold text-zinc-200">
             Coding AI Assistant
           </h1>
