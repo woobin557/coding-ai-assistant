@@ -46,6 +46,13 @@ export class GeminiProvider implements AIProvider {
 /**
  * Reads a Gemini SSE body and yields only the generated text deltas,
  * hiding the `data: {...}` framing and JSON shape from callers.
+ *
+ * Splits on line boundaries rather than blank-line event separators:
+ * Google's server uses CRLF ("\r\n\r\n") between events rather than the
+ * "\n\n" the SSE spec implies, and since each `data:` line always contains
+ * a complete JSON object (embedded newlines are escaped as "\\n"), parsing
+ * line-by-line as soon as a line is complete is both simpler and correct
+ * regardless of which line ending is used.
  */
 async function* parseSseTextStream(
   body: ReadableStream<Uint8Array>
@@ -60,26 +67,27 @@ async function* parseSseTextStream(
       if (done) break;
 
       buffer += decoder.decode(value, { stream: true });
-      const events = buffer.split("\n\n");
-      buffer = events.pop() ?? "";
+      const lines = buffer.split("\n");
+      buffer = lines.pop() ?? "";
 
-      for (const event of events) {
-        const text = extractTextFromEvent(event);
+      for (const line of lines) {
+        const text = extractTextFromLine(line);
         if (text) yield text;
       }
     }
+
+    const text = extractTextFromLine(buffer);
+    if (text) yield text;
   } finally {
     reader.releaseLock();
   }
 }
 
-function extractTextFromEvent(event: string): string | null {
-  const dataLine = event
-    .split("\n")
-    .find((line) => line.startsWith("data:"));
-  if (!dataLine) return null;
+function extractTextFromLine(line: string): string | null {
+  const trimmed = line.trim();
+  if (!trimmed.startsWith("data:")) return null;
 
-  const jsonText = dataLine.slice("data:".length).trim();
+  const jsonText = trimmed.slice("data:".length).trim();
   if (!jsonText) return null;
 
   try {
