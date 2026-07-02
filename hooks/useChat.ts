@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export interface Message {
   id: string;
@@ -16,7 +16,9 @@ interface UseChatOptions {
 export function useChat({ messages, onMessagesChange }: UseChatOptions) {
   const [isStreaming, setIsStreaming] = useState(false);
   const messagesRef = useRef(messages);
-  messagesRef.current = messages;
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
 
   const sendMessage = useCallback(
     async (content: string) => {
