@@ -2,7 +2,7 @@
 
 Phind, Cursor Web 같은 개발자 도구를 참고해 만든 코딩 특화 AI 어시스턴트 웹앱입니다. Google Gemini API와 스트리밍으로 통신하며, 마크다운/코드 하이라이팅 렌더링과 로컬 저장 기반 대화 히스토리를 제공합니다.
 
-- **배포 주소**: https://coding-ai-assistant-dusky.vercel.app
+- **배포 주소**: https://coding-ai-assistant-dusky.vercel.app (Vercel)
 - **저장소**: https://github.com/woobin557/coding-ai-assistant
 
 ## 기술 스택
